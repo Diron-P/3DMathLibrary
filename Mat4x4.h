@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Vector3D.h"
+#include "vector3d.h"
+#include "vector4d.h"
 #include "Vector4D.h"
 
 namespace Oblivion
@@ -12,7 +13,7 @@ namespace Oblivion
 		{
 		public:
 			T m[4][4];
-					   
+
 			inline Mat4x4()
 			{
 				memset(m, 0, sizeof(m[0][0]) * 4 * 4);
@@ -22,10 +23,7 @@ namespace Oblivion
 			inline Mat4x4(const T diagonal)
 			{
 				memset(m, 0, sizeof(m[0][0]) * 4 * 4);
-				m[0][0] = diagonal;
-				m[1][1] = diagonal;
-				m[2][2] = diagonal;
-				m[3][3] = diagonal;
+				m[0][0] = m[1][1] = m[2][2] = m[3][3] = diagonal;
 			}
 
 			inline Mat4x4(const T& num1, const T& num2, const T& num3, const T& num4, const T& num5, const T& num6, const T& num7, const T& num8, const T& num9, const T& num10, const T& num11, const T& num12, const T& num13, const T& num14, const T& num15, const T& num16)
@@ -36,22 +34,19 @@ namespace Oblivion
 				m[3][0] = num13; m[3][1] = num14; m[3][2] = num15; m[3][3] = num16;
 			}
 
-			// Initialize using Vector3D
-			inline Mat4x4(const Vector3D<T>& i, const Vector3D<T>& j, const Vector3D<T>& k)
+			// Parameters - basis vectors (x, y, z axes)
+			inline Mat4x4(const Vector4D<T>& vx, const Vector4D<T>& vy, const Vector4D<T>& vz, const Vector4D<T>& vw)
 			{
-				m[0][0] = i.x; m[0][1] = i.y; m[0][2] = i.z; m[0][3] = 0.0f;
-				m[1][0] = j.x; m[1][1] = j.y; m[1][2] = j.z; m[1][3] = 0.0f;
-				m[2][0] = k.x; m[2][1] = k.y; m[2][2] = k.z; m[2][3] = 0.0f;
-				m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;
+				m[0][0] = vx.x; m[0][1] = vx.y; m[0][2] = vx.z; m[0][3] = vx.w;
+				m[1][0] = vy.x; m[1][1] = vy.y; m[1][2] = vy.z; m[1][3] = vy.w;
+				m[2][0] = vz.x; m[2][1] = vz.y; m[2][2] = vz.z; m[2][3] = vz.w;
+				m[3][0] = vw.x; m[3][1] = vw.y; m[3][2] = vw.z; m[3][3] = vw.w;
 			}
 
-			// Initialize using Vector4D
-			inline Mat4x4(const Vector4D<T>& i, const Vector4D<T>& j, const Vector4D<T>& k, const Vector4D<T>& t)
+			inline Mat4x4& Zero()
 			{
-				m[0][0] = i.x; m[0][1] = i.y; m[0][2] = i.z; m[0][3] = i.w;
-				m[1][0] = j.x; m[1][1] = j.y; m[1][2] = j.z; m[1][3] = j.w;
-				m[2][0] = k.x; m[2][1] = k.y; m[2][2] = k.z; m[2][3] = k.w;
-				m[3][0] = t.x; m[3][1] = t.y; m[3][2] = t.z; m[3][3] = t.w;
+				memset(m, 0, sizeof(m[0][0]) * 4 * 4);
+				return *this;
 			}
 
 			inline Mat4x4& Identity()
@@ -60,17 +55,22 @@ namespace Oblivion
 				return *this;
 			}
 
-			inline Vector4D<T> GetColumn(int i) const
+			inline Vector3D<T> GetTranslation() const
 			{
-				return Vector4D<T>(m[0][i], m[1][i], m[2][i], m[3][i]);
+				return Vector3D<T>(m[3][0], m[3][1], m[3][2]);
 			}
 
-			inline Mat4x4& SetColumn(int i, Vector4D<T>& column)
+			inline Vector4D<T> GetRow(int i) const
 			{
-				m[0][i] = column.x;
-				m[1][i] = column.y;
-				m[2][i] = column.z;
-				m[3][i] = column.w;
+				return Vector4D<T>(m[i][0], m[i][1], m[i][2], m[i][3]);
+			}
+
+			inline Mat4x4& SetRow(int i, const Vector3D<T>& column)
+			{
+				m[i][0] = column.x;
+				m[i][1] = column.y;
+				m[i][2] = column.z;
+				m[i][3] = column.w;
 
 				return *this;
 			}
@@ -108,7 +108,7 @@ namespace Oblivion
 				return *this;
 			}
 
-			inline Mat4x4& operator*(const float& scalar)
+			inline Mat4x4& operator*(const float& scalar) const
 			{
 				return Mat4x4(
 					scalar * m[0][0], scalar * m[0][1], scalar * m[0][2], scalar * m[0][3],
@@ -118,7 +118,7 @@ namespace Oblivion
 				);
 			}
 
-			inline Mat4x4 operator*(const Mat4x4& m2)
+			inline Mat4x4 operator*(const Mat4x4& m2) const
 			{
 				return Mat4x4(
 					m[0][0] * m2[0][0] + m[0][1] * m2[1][0] + m[0][2] * m2[2][0] + m[0][3] * m2[3][0],
@@ -140,17 +140,17 @@ namespace Oblivion
 				);
 			}
 
-			inline Vector4D<T> operator*(const Vector4D<T> & v)
+			inline Vector4D<T> operator*(const Vector4D<T>& v) const
 			{
 				return Vector4D<T>(
 					v.x * m[0][0] + v.y * m[1][0] + v.z * m[2][0] + v.w * m[3][0],
 					v.x * m[0][1] + v.y * m[1][1] + v.z * m[2][1] + v.w * m[3][1],
 					v.x * m[0][2] + v.y * m[1][2] + v.z * m[2][2] + v.w * m[3][2],
 					v.x * m[0][3] + v.y * m[1][3] + v.z * m[2][3] + v.w * m[3][3]
-				);
+					);
 			}
 
-			inline bool operator==(const Mat4x4 & m2)
+			inline bool operator==(const Mat4x4& m2) const
 			{
 				return
 					(m[0][0] == m2[0][0]) && (m[0][1] == m2[0][1]) &&		//1st row
@@ -163,7 +163,7 @@ namespace Oblivion
 					(m[3][2] == m2[3][2]) && (m[3][3] == m2[3][3]);
 			}
 
-			inline bool operator!=(const Mat4x4 & m2)
+			inline bool operator!=(const Mat4x4& m2) const
 			{
 				return
 					(m[0][0] != m2[0][0]) || (m[0][1] != m2[0][1]) ||		//1st row
@@ -181,9 +181,9 @@ namespace Oblivion
 				return m[i];
 			}
 
-			T* operator [] (uint8_t i) 
-			{ 
-				return m[i]; 
+			T* operator [] (uint8_t i)
+			{
+				return m[i];
 			}
 
 			inline Mat4x4 Transpose() const
@@ -196,7 +196,7 @@ namespace Oblivion
 				);
 			}
 
-			inline T Determinant()
+			inline T Determinant() const
 			{
 				return
 					m[0][0] * (
@@ -220,7 +220,7 @@ namespace Oblivion
 						m[1][2] * (m[2][0] * m[3][1] - m[2][1] * m[3][0]));
 			}
 
-			inline bool Inverse(Mat4x4& dst)
+			inline bool Inverse(Mat4x4& dst) const
 			{
 				T determinant = Determinant();
 
@@ -234,13 +234,13 @@ namespace Oblivion
 				// Row 1 transposed
 				dst[0][0] = (m[1][1] * m[2][2] * m[3][3] + m[1][2] * m[2][3] * m[3][1] + m[1][3] * m[2][1] * m[3][2]
 					- m[1][1] * m[2][3] * m[3][2] - m[1][2] * m[2][1] * m[3][3] - m[1][3] * m[2][2] * m[3][1]) * inversedDet;
-				
+
 				dst[1][0] = -(m[1][0] * m[2][2] * m[3][3] + m[1][2] * m[2][3] * m[3][0] + m[1][3] * m[2][0] * m[3][2]
 					- m[1][0] * m[2][3] * m[3][2] - m[1][2] * m[2][0] * m[3][3] - m[1][3] * m[2][2] * m[3][0]) * inversedDet;
 
 				dst[2][0] = (m[1][0] * m[2][1] * m[3][3] + m[1][1] * m[2][3] * m[3][0] + m[1][3] * m[2][0] * m[3][1]
 					- m[1][0] * m[2][3] * m[3][1] - m[1][1] * m[2][0] * m[3][3] - m[1][3] * m[2][1] * m[3][0]) * inversedDet;
-				
+
 				dst[3][0] = -(m[1][0] * m[2][1] * m[3][2] + m[1][1] * m[2][2] * m[3][0] + m[1][2] * m[2][0] * m[3][1]
 					- m[1][0] * m[2][2] * m[3][1] - m[1][1] * m[2][0] * m[3][2] - m[1][2] * m[2][1] * m[3][0]) * inversedDet;
 
@@ -272,7 +272,7 @@ namespace Oblivion
 
 				// Row 4 transposed
 				dst[0][3] = -(m[0][1] * m[1][2] * m[2][3] + m[0][2] * m[1][3] * m[2][1] + m[0][3] * m[1][1] * m[2][2]
-						- m[0][1] * m[1][3] * m[2][2] - m[0][2] * m[1][1] * m[2][3] - m[0][3] * m[1][2] * m[2][1]) * inversedDet;
+					- m[0][1] * m[1][3] * m[2][2] - m[0][2] * m[1][1] * m[2][3] - m[0][3] * m[1][2] * m[2][1]) * inversedDet;
 
 				dst[1][3] = (m[0][0] * m[1][2] * m[2][3] + m[0][2] * m[1][3] * m[2][0] + m[0][3] * m[1][0] * m[2][2]
 					- m[0][0] * m[1][3] * m[2][2] - m[0][2] * m[1][0] * m[2][3] - m[0][3] * m[1][2] * m[2][0]) * inversedDet;
@@ -311,5 +311,7 @@ namespace Oblivion
 			//}
 		};
 
+		typedef Mat4x4<float> Matrix4f;		// A 4x4 matrix with the type of float.
+		typedef Mat4x4<double> Matrix4d;	// A 4x4 matrix with the type of double.
 	}
 }

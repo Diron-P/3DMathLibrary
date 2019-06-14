@@ -7,7 +7,7 @@ namespace Oblivion
 {
 	namespace Math
 	{
-		// Scale along the cardinal axes
+		// Scale along cardinal axes
 		template <typename T>
 		inline Mat4x4<T> Scale(const Mat4x4<T>& m, const Vector3D<T>& v)
 		{
@@ -22,7 +22,7 @@ namespace Oblivion
 
 		// Scale in an arbitrary direction
 		template <typename T>
-		inline Mat4x4<T> Scale(const Mat4x4<T>& m, Vector3D<T> v, T s)
+		inline Mat4x4<T> Scale(const Mat4x4<T>& m, Vector3D<T>& v, T s)
 		{
 			v.Normalize();
 
@@ -49,20 +49,20 @@ namespace Oblivion
 			return scale * m;
 		}
 
-		template <typename T>
-		inline Mat4x4<T> Rotate(const Mat4x4<T>& m, float angle, Vector3D<T> v)
+		//template <typename T>
+		inline Mat4x4<float> Rotate(const Mat4x4<float>& m, float angle, Vector3D<float>& v)
 		{
 			v.Normalize();
 
-			T sin = Sin(angle);
-			T cos = Cos(angle);
-			T temp = 1.0f - cos;
+			float sin = Sin(angle);
+			float cos = Cos(angle);
+			float temp = 1.0f - cos;
 
-			T axisX = v.x * temp;
-			T axisY = v.y * temp;
-			T axisZ = v.z * temp;
+			float axisX = v.x * temp;
+			float axisY = v.y * temp;
+			float axisZ = v.z * temp;
 
-			Mat4x4<T> rotate;
+			Mat4x4<float> rotate;
 
 			rotate[0][0] = v.x * axisX + cos;
 			rotate[0][1] = v.x * axisY + v.z * sin;
@@ -76,7 +76,7 @@ namespace Oblivion
 			rotate[2][1] = v.y * axisZ - v.x * sin;
 			rotate[2][2] = v.z * axisZ + cos;
 
-			Mat4x4<T> result;
+			Mat4x4<float> result;
 
 			result[0][0] = m[0][0] * rotate[0][0] + m[0][1] * rotate[1][0] + m[0][2] * rotate[2][0];
 			result[0][1] = m[0][0] * rotate[0][1] + m[0][1] * rotate[1][1] + m[0][2] * rotate[2][1];
@@ -166,6 +166,33 @@ namespace Oblivion
 			result[3][2] = v.z + m[3][2] * v.z;
 
 			return result;
+		}
+
+		// Reflect about an arbitrary plane
+		template <typename T>
+		inline Mat4x4<T> Reflect(const Mat4x4<T>& m, const Vector3D<T>& v)
+		{
+			v.Normalize();
+
+			T axisX = -2.0f * v.x;
+			T axisY = -2.0f * v.y;
+			T axisZ = -2.0f * v.z;
+
+			Mat4x4<T> reflect;
+
+			reflect[0][0] = 1.0f + axisX * v.x;
+			reflect[0][1] = axisX * v.y;
+			reflect[0][2] = axisX * v.z;
+
+			reflect[1][0] = axisX * v.y;
+			reflect[1][1] = 1.0f + axisY * v.y;
+			reflect[1][2] = axisY * v.z;
+
+			reflect[2][0] = axisX * v.z;
+			reflect[2][1] = axisY * v.z;
+			reflect[2][2] = 1.0f + axisZ * v.z;
+
+			return reflect * m;
 		}
 	}
 }

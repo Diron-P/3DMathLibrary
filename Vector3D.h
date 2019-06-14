@@ -60,12 +60,12 @@ namespace Oblivion
 				return Vector3D(x + v.x, y + v.y, z + v.z);
 			}
 
-			inline Vector3D operator-(const Vector3D & v) const
+			inline Vector3D operator-(const Vector3D& v) const
 			{
 				return Vector3D(x - v.x, y - v.y, z - v.z);
 			}
 
-			inline float operator*(const Vector3D & v) const
+			inline float operator*(const Vector3D& v) const
 			{
 				return (x * v.x) + (y * v.y) + (z * v.z);
 			}
@@ -75,17 +75,17 @@ namespace Oblivion
 				return Vector3D(scalar * x, scalar * y, scalar * z);
 			}
 
-			inline Vector3D operator^(const Vector3D & v) const
+			inline Vector3D operator^(const Vector3D& v) const
 			{
 				return Vector3D(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
 			}
 
-			inline bool operator==(const Vector3D & v) const
+			inline bool operator==(const Vector3D& v) const
 			{
 				return (x == v.x && y == v.y && z == v.z);
 			}
 
-			inline bool operator!=(const Vector3D & v) const
+			inline bool operator!=(const Vector3D& v) const
 			{
 				return (x != v.x || y != v.y || z != v.z);
 			}
@@ -100,12 +100,12 @@ namespace Oblivion
 				return sqrt((x * x) + (y * y) + (z * z));
 			}
 
-			inline float DotProduct(const Vector3D & v1, const Vector3D & v2)
+			inline float DotProduct(const Vector3D& v1, const Vector3D& v2)
 			{
 				return v1 * v2;
 			}
 
-			inline Vector3D CrossProduct(const Vector3D & v1, const Vector3D & v2)
+			inline Vector3D CrossProduct(const Vector3D& v1, const Vector3D& v2)
 			{
 				return v1 ^ v2;
 			}
@@ -128,6 +128,8 @@ namespace Oblivion
 				return out;
 			}
 		};
+
+		typedef Vector3D<float> Vector3f;	// A 3D vector with the type of float.
+		typedef Vector3D<double> Vector3d;	// A 3D vector with the type of double.
 	}
 }
-

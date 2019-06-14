@@ -37,50 +37,56 @@ namespace Oblivion
 				m[2][0] = vz.x; m[2][1] = vz.y; m[2][2] = vz.z;
 			}
 
+			inline Mat3x3& Zero()
+			{
+				memset(m, 0, sizeof(m[0][0]) * 3 * 3);
+				return *this;
+			}
+
 			inline Mat3x3& Identity()
 			{
 				m[0][0] = m[1][1] = m[2][2] = 1.0f;
 				return *this;
 			}
 
-			inline Vector3D<T> GetColumn(int i) const
+			inline Vector3D<T> GetRow(int i) const
 			{
-				return Vector3D<T>(m[0][i], m[1][i], m[2][i]);
+				return Vector3D<T>(m[i][0], m[i][1], m[i][2]);
 			}
 
-			inline Mat3x3& SetColumn(int i, Vector3D<T>& column)
+			inline Mat3x3& SetRow(int i, const Vector3D<T>& column)
 			{
-				m[0][i] = column.x;
-				m[1][i] = column.y;
-				m[2][i] = column.z;
+				m[i][0] = column.x;
+				m[i][1] = column.y;
+				m[i][2] = column.z;
 
 				return *this;
 			}
 
-			inline Mat3x3& operator*=(const Mat3x3& n)
+			inline Mat3x3& operator*=(const Mat3x3& m2)
 			{
 				//Row 1
 				Vector3D<T> row1(m[0][0], m[0][1], m[0][2]);
-				m[0][0] = row1.x * n.m[0][0] + row1.y * n.m[1][0] + row1.z * n.m[2][0];
-				m[0][1] = row1.x * n.m[0][1] + row1.y * n.m[1][1] + row1.z * n.m[2][1];
-				m[0][2] = row1.x * n.m[0][2] + row1.y * n.m[1][2] + row1.z * n.m[2][2];
+				m[0][0] = row1.x * m2[0][0] + row1.y * m2[1][0] + row1.z * m2[2][0];
+				m[0][1] = row1.x * m2[0][1] + row1.y * m2[1][1] + row1.z * m2[2][1];
+				m[0][2] = row1.x * m2[0][2] + row1.y * m2[1][2] + row1.z * m2[2][2];
 
 				//Row 2
 				Vector3D<T> row2(m[1][0], m[1][1], m[1][2]);
-				m[1][0] = row2.x * n.m[0][0] + row2.y * n.m[1][0] + row2.z * n.m[2][0];
-				m[1][1] = row2.x * n.m[0][1] + row2.y * n.m[1][1] + row2.z * n.m[2][1];
-				m[1][2] = row2.x * n.m[0][2] + row2.y * n.m[1][2] + row2.z * n.m[2][2];
+				m[1][0] = row2.x * m2[0][0] + row2.y * m2[1][0] + row2.z * m2[2][0];
+				m[1][1] = row2.x * m2[0][1] + row2.y * m2[1][1] + row2.z * m2[2][1];
+				m[1][2] = row2.x * m2[0][2] + row2.y * m2[1][2] + row2.z * m2[2][2];
 
 				//Row 3
 				Vector3D<T> row3(m[2][0], m[2][1], m[2][2]);
-				m[2][0] = row3.x * n.m[0][0] + row3.y * n.m[1][0] + row3.z * n.m[2][0];
-				m[2][1] = row3.x * n.m[0][1] + row3.y * n.m[1][1] + row3.z * n.m[2][1];
-				m[2][2] = row3.x * n.m[0][2] + row3.y * n.m[1][2] + row3.z * n.m[2][2];
+				m[2][0] = row3.x * m2[0][0] + row3.y * m2[1][0] + row3.z * m2[2][0];
+				m[2][1] = row3.x * m2[0][1] + row3.y * m2[1][1] + row3.z * m2[2][1];
+				m[2][2] = row3.x * m2[0][2] + row3.y * m2[1][2] + row3.z * m2[2][2];
 
 				return *this;
 			}
 
-			inline Mat3x3 operator*(const float& scalar)
+			inline Mat3x3 operator*(const float& scalar) const
 			{
 				return Mat3x3(
 					scalar * m[0][0], scalar * m[0][1], scalar * m[0][2],
@@ -89,7 +95,7 @@ namespace Oblivion
 				);
 			}
 
-			inline Mat3x3 operator*(const Mat3x3& m2)
+			inline Mat3x3 operator*(const Mat3x3& m2) const
 			{
 				return Mat3x3(
 					m[0][0] * m2[0][0] + m[0][1] * m2[1][0] + m[0][2] * m2[2][0],
@@ -104,16 +110,16 @@ namespace Oblivion
 				);
 			}
 
-			inline Vector3D<T> operator*(const Vector3D<T> & v)
+			inline Vector3D<T> operator*(const Vector3D<T>& v) const
 			{
-				return Vector3D(
+				return Vector3D<T>(
 					v.x * m[0][0] + v.y * m[1][0] + v.z * m[2][0],
 					v.x * m[0][1] + v.y * m[1][1] + v.z * m[2][1],
 					v.x * m[0][2] + v.y * m[1][2] + v.z * m[2][2]
-				);
+					);
 			}
 
-			inline bool operator==(const Mat3x3 & m2)
+			inline bool operator==(const Mat3x3& m2) const
 			{
 				return
 					(m[0][0] == m2[0][0]) && (m[0][1] == m2[0][1]) && (m[0][2] == m2[0][2]) &&
@@ -121,7 +127,7 @@ namespace Oblivion
 					(m[2][0] == m2[2][0]) && (m[2][1] == m2[2][1]) && (m[2][2] == m2[2][2]);
 			}
 
-			inline bool operator!=(const Mat3x3 & m2)
+			inline bool operator!=(const Mat3x3& m2) const
 			{
 				return
 					(m[0][0] != m2[0][0]) || (m[0][1] != m2[0][1]) || (m[0][2] != m2[0][2]) ||
@@ -139,7 +145,7 @@ namespace Oblivion
 				return m[i];
 			}
 
-			inline Mat3x3 Transpose()
+			inline Mat3x3 Transpose() const
 			{
 				return Mat3x3(
 					Vector3D<T>(m[0][0], m[1][0], m[2][0]),
@@ -148,7 +154,7 @@ namespace Oblivion
 				);
 			}
 
-			inline float Determinant()
+			inline float Determinant() const
 			{
 				return
 					m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
@@ -156,7 +162,7 @@ namespace Oblivion
 					m[2][0] * (m[0][1] * m[1][2] - m[0][2] * m[1][1]);
 			}
 
-			inline Mat3x3 Inverse()
+			inline Mat3x3 Inverse() const
 			{
 				float determinant = Determinant();
 
@@ -169,17 +175,20 @@ namespace Oblivion
 
 				// Transposed inverse matrix
 				return Mat3x3(
-					 (m[1][1] * m[2][2] - m[1][2] * m[2][1]) * inversedDet,
+					(m[1][1] * m[2][2] - m[1][2] * m[2][1]) * inversedDet,
 					-(m[0][1] * m[2][2] - m[0][2] * m[2][1]) * inversedDet,
-					 (m[0][1] * m[1][2] - m[0][2] * m[1][1]) * inversedDet,	
+					(m[0][1] * m[1][2] - m[0][2] * m[1][1]) * inversedDet,
 					-(m[1][0] * m[2][2] - m[1][2] * m[2][0]) * inversedDet,
-					 (m[0][0] * m[2][2] - m[0][2] * m[2][0]) * inversedDet, 
+					(m[0][0] * m[2][2] - m[0][2] * m[2][0]) * inversedDet,
 					-(m[0][0] * m[1][2] - m[0][2] * m[1][0]) * inversedDet,
-					 (m[1][0] * m[2][1] - m[1][1] * m[2][0]) * inversedDet,
+					(m[1][0] * m[2][1] - m[1][1] * m[2][0]) * inversedDet,
 					-(m[0][0] * m[2][1] - m[0][1] * m[2][0]) * inversedDet,
-					 (m[0][0] * m[1][1] - m[0][1] * m[1][0]) * inversedDet	
+					(m[0][0] * m[1][1] - m[0][1] * m[1][0]) * inversedDet
 				);
 			}
 		};
+
+		typedef Mat3x3<float> Matrix3f;		// A 3x3 matrix with the type of float.
+		typedef Mat3x3<double> Matrix3d;	// A 3x3 matrix with the type of double.
 	}
 }
