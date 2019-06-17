@@ -113,9 +113,9 @@ namespace Oblivion
 			inline Vector3D& Normalize()
 			{
 				float length = Magnitude();
-				if (length > 0)
+				if (length > 0.0f)
 				{
-					float invLen = 1 / length;
+					float invLen = 1.0f / length;
 					x *= invLen, y *= invLen, z *= invLen;
 				}
 

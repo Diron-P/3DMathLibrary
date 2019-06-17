@@ -1,142 +1,164 @@
 #pragma once
 
-#include "vector3d.h"
-#include "vector4d.h"
+#include "Vector3D.h"
+#include "Vector4D.h"
 #include "math.h"
 #include <iostream>
 
-namespace Oblivion
-{
-	namespace Math
-	{
-		class Quaternion
-		{
-		public:
-			float w;
-			Vector3D v;
+namespace Oblivion {
+namespace Math {
+    template <typename T>
+    class Quaternion {
+    public:
+        T w;
+        Vector3D<T> v;
 
-			Quaternion();
-			Quaternion(const float& w, const Vector3D& v);
-			Quaternion(const Vector4D& v);
-			Quaternion(const Quaternion& q);
+        /**********************************************************************
+			****************Quaternion constructor definitions*****************
+			**********************************************************************/
 
-			Quaternion& setIdentity();
-			float magnitude() const;
+        Quaternion()
+            : w(0.0f)
+        {
+        }
 
-			Quaternion& operator+=(const Quaternion& q);
-			Quaternion& operator-=(const Quaternion& q);
-			Quaternion& operator*=(const Quaternion& q);
+        Quaternion(const float& w, const Vector3D<T>& v)
+            : w(w)
+            , v(v)
+        {
+        }
 
-			Quaternion operator+(const Quaternion& q2) const;
-			Quaternion operator-(const Quaternion& q2) const;
-			Quaternion operator*(const Quaternion& q2) const;
-			bool operator==(const Quaternion& q) const;
-			bool operator!=(const Quaternion& q) const;
+        Quaternion(const Vector4D<T>& v)
+            : w(v.w)
+            , v(v.x, v.y, v.z)
+        {
+        }
 
-			Quaternion inverse() const; //TODO
-		};
+        Quaternion(const Quaternion& q)
+            : w(q.w)
+            , v(q.v)
+        {
+        }
 
-		/**********************************************************************
-		****************Quaternion constructor definitions*****************
-		**********************************************************************/
-		Quaternion::Quaternion()
-			: w(0.0f)
-		{
-		}
+        /**********************************************************************
+			****************Quaternion inline function definitions*****************
+			**********************************************************************/
 
-		Quaternion::Quaternion(const float& w, const Vector3D& v)
-			: w(w), v(v)
-		{
-		}
+        inline Quaternion& SetIdentity()
+        {
+            w = 1.0f;
+            v.x = v.y = v.z = 0.0f;
+            return *this;
+        }
 
-		Quaternion::Quaternion(const Vector4D& v)
-			: w(v.w), v(v.x, v.y, v.z)
-		{
-		}
+        inline Quaternion& operator+=(const Quaternion& q)
+        {
+            this->w += q.w;
+            this->v += q.v;
+            return *this;
+        }
 
-		Quaternion::Quaternion(const Quaternion& q)
-			: w(q.w), v(q.v)
-		{
-		}
+        inline Quaternion& operator-=(const Quaternion& q)
+        {
+            this->w -= q.w;
+            this->v -= q.v;
+            return *this;
+        }
 
-		/**********************************************************************
-		****************Quaternion inline function definitions*****************
-		**********************************************************************/
-		inline Quaternion& Quaternion::setIdentity()
-		{
-			w = 1.0f;
-			v.x = v.y = v.z = 0.0f;
-			return *this;
-		}
+        inline Quaternion& operator*=(const Quaternion& q)
+        {
+            *this = *this * q;
+            return *this;
+        }
 
-		inline float Quaternion::magnitude() const
-		{
-			return sqrt(w * w + (v.x * v.x + v.y * v.y + v.z * v.z));
-		}
+        inline Quaternion operator+(const Quaternion& q) const
+        {
+            return Quaternion(w + q.w, v + q.v);
+        }
 
-		inline Quaternion& Quaternion::operator+=(const Quaternion& q)
-		{
-			this->w += q.w;
-			this->v += q.v;
-			return *this;
-		}
+        inline Quaternion operator-(const Quaternion& q) const
+        {
+            return Quaternion(w - q.w, v - q.v);
+        }
 
-		inline Quaternion& Quaternion::operator-=(const Quaternion& q)
-		{
-			this->w -= q.w;
-			this->v -= q.v;
-			return *this;
-		}
+        inline Quaternion operator*(const Quaternion& q2) const
+        {
+            return Quaternion(
+                w * q2.w - v.x * q2.v.x - v.y * q2.v.y - v.z * q2.v.z,
+                Vector3D<T>(w * q2.v.x + v.x * q2.w + v.y * q2.v.z - v.z * q2.v.y,
+                    w * q2.v.y + v.y * q2.w + v.z * q2.v.x - v.x * q2.v.z,
+                    w * q2.v.z + v.z * q2.w + v.x * q2.v.y - v.y * q2.v.x));
+        }
 
-		inline Quaternion& Quaternion::operator*=(const Quaternion& q)
-		{
-			*this = *this * q;
-			return *this;
-		}
+        inline Quaternion operator*(const float& scalar) const
+        {
+            return Quaternion(w * scalar, v * scalar);
+        }
 
-		inline Quaternion Quaternion::operator+(const Quaternion& q) const
-		{
-			return Quaternion(w + q.w, v + q.v);
-		}
+        inline bool operator==(const Quaternion& q) const
+        {
+            return w == q.w && v == q.v;
+        }
 
-		inline Quaternion Quaternion::operator-(const Quaternion& q) const
-		{
-			return Quaternion(w - q.w, v - q.v);
-		}
+        inline bool operator!=(const Quaternion& q) const
+        {
+            return w != q.w || v != q.v;
+        }
 
-		inline Quaternion Quaternion::operator*(const Quaternion& q2) const
-		{
-			return Quaternion(
-				w * q2.w - v.x * q2.v.x - v.y * q2.v.y - v.z * q2.v.z,
-				Vector3D(w * q2.v.x + v.x * q2.w + v.y * q2.v.z - v.z * q2.v.y,
-					w * q2.v.y + v.y * q2.w + v.z * q2.v.x - v.x * q2.v.z,
-					w * q2.v.z + v.z * q2.w + v.x * q2.v.y - v.y * q2.v.x)
-			);
-		}
+        inline T Magnitude() const
+        {
+            return sqrt(w * w) + v.Magnitude();
+        }
 
-		inline bool Quaternion::operator==(const Quaternion& q) const
-		{
-			return w == q.w && v == q.v;
-		}
+        // Can be further optimized
+        inline Quaternion Inverse() const
+        {
+            Quaternion conjugate(w, Vector3D<T>(-(v.x), -(v.y), -(v.z)));
 
-		inline bool Quaternion::operator!=(const Quaternion& q) const
-		{
-			return w != q.w || v != q.v;
-		}
+            T inverseMag = 1.0f / Magnitude();
 
-		inline Quaternion Quaternion::inverse() const
-		{
-			return Quaternion(w, Vector3D(-(v.x), -(v.y), -(v.z)) );
-		}
+            return Quaternion(conjugate * inverseMag);
+        }
 
+        inline Quaternion& Conjugated()
+        {
+            v.x = -v.x;
+            v.y = -v.y;
+            v.z = -v.z;
+            return *this;
+        }
 
-		/**********************************************************************
-		*********************Output quaternions on console*********************
-		**********************************************************************/
-		inline std::ostream& operator<<(std::ostream& out, const Quaternion& q)
-		{
-			out << "Quat[" << q.w << ", " << q.v << "]";
-			return out;
-		}
-	}
-}
+        /*inline Mat3x3<T> ToRotationMatrix() const
+        {
+            Mat3x3<T> rotMatrix;
+
+            rotMatrix.m[0][0] = 1.0f - 2.0f * v.y * v.y - 2 * v.z * v.z;
+            rotMatrix.m[0][1] = 2.0f * v.x * v.y + 2.0f * w * v.z;
+            rotMatrix.m[0][2] = 2.0f * v.x * v.z - 2.0f * v.w * v.y;
+
+            rotMatrix.m[1][0] = 2 * v.x * v.y - 2.0f * w * v.z;
+            rotMatrix.m[1][1] = 1.0f - 2 * v.x * v.x - 2.0f * v.z * v.z;
+            rotMatrix.m[1][2] = 2.0f * v.y * v.z + 2.0f * w * v.x;
+
+            rotMatrix.m[2][0] = 2.0f * v.x * v.z + 2.0f * w * v.y;
+            rotMatrix.m[2][1] = 2.0f * v.y * v.z - 2.0f * w * v.x;
+            rotMatrix.m[2][2] = 1.0f - 2 * v.x * v.x - 2.0f * v.y * v.y;
+
+            return rotMatrix;
+        }*/
+
+        /**********************************************************************
+			*********************Output quaternions on console*********************
+			**********************************************************************/
+        inline std::ostream& operator<<(std::ostream& out)
+        {
+            out << "Quat[" << w << ", " << v << "]";
+            return out;
+        }
+    };
+
+    typedef Quaternion<float> Quatf;
+    typedef Quaternion<double> Quatd;
+
+} // end namespace Math
+} // end namespace Oblivion
