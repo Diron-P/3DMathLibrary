@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Quaternion.h"
+#include "Mappings.h"
 
 namespace Oblivion {
 namespace Math {
@@ -179,67 +179,7 @@ namespace Math {
                 (m[1][0] * m[2][1] - m[1][1] * m[2][0]) * inversedDet,
                 -(m[0][0] * m[2][1] - m[0][1] * m[2][0]) * inversedDet,
                 (m[0][0] * m[1][1] - m[0][1] * m[1][0]) * inversedDet);
-        }
-
-        inline Quaternion<T> ToQuaternion()
-        {
-            T wAbsVal = m[0][0] + m[1][1] + m[2][2];
-            T xAbsVal = m[0][0] - m[1][1] - m[2][2];
-            T yAbsVal = -m[0][0] + m[1][1] - m[2][2];
-            T zAbsVal = -m[0][0] - m[1][1] + m[2][2];
-
-            int biggestComp = 0;
-            T biggestAbsVal = wAbsVal;
-            if (xAbsVal > biggestAbsVal) {
-                biggestAbsVal = xAbsVal;
-                biggestComp = 1;
-            }
-            if (yAbsVal > biggestAbsVal) {
-                biggestAbsVal = yAbsVal;
-                biggestComp = 2;
-            }
-            if (zAbsVal > biggestAbsVal) {
-                biggestAbsVal = zAbsVal;
-                biggestComp = 3;
-            }
-
-            T biggestVal = sqrt(biggestAbsVal + 1.0f) * 0.5f;
-            T multComp = 0.25f / biggestVal;
-
-            Quaternion<T> result;
-
-            switch (biggestComp) {
-            case 0:
-                result.w = biggestVal;
-                result.v.x = m[1][2] - m[2][1] * multComp;
-                result.v.y = m[2][0] - m[0][2] * multComp;
-                result.v.z = m[0][1] - m[1][0] * multComp;
-                break;
-            case 1:
-                result.v.x = biggestVal;
-                result.w = m[1][2] - m[2][1] * multComp;
-                result.v.y = m[0][1] + m[1][0] * multComp;
-                result.v.z = m[2][0] + m[0][2] * multComp;
-                break;
-            case 2:
-                result.v.y = biggestVal;
-                result.w = m[2][0] - m[0][2] * multComp;
-                result.v.x = m[0][1] + m[1][0] * multComp;
-                result.v.z = m[1][2] + m[2][1] * multComp;
-                break;
-            case 3:
-                result.v.z = biggestVal;
-                result.w = m[0][1] - m[1][0] * multComp;
-                result.v.x = m[2][0] + m[0][2] * multComp;
-                result.v.y = m[1][2] + m[2][1] * multComp;
-                break;
-            }
-
-            return result;
-        }
+        }   
     };
-
-    typedef Mat3x3<float> Matrix3f; // A 3x3 matrix with the type of float.
-    typedef Mat3x3<double> Matrix3d; // A 3x3 matrix with the type of double.
 } // end namespace Math
 } // end namespace Oblivion

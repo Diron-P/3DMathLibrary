@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MathFunctions.h"
-#include "Mat4x4.h"
+#include "Math/Mappings.h"
 
 namespace Oblivion
 {

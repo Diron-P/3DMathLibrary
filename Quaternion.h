@@ -1,9 +1,6 @@
 #pragma once
 
-#include "Vector3D.h"
-#include "Vector4D.h"
-#include "math.h"
-#include <iostream>
+#include "Mappings.h"
 
 namespace Oblivion {
 namespace Math {
@@ -14,8 +11,8 @@ namespace Math {
         Vector3D<T> v;
 
         /**********************************************************************
-			****************Quaternion constructor definitions*****************
-			**********************************************************************/
+		****************Quaternion constructor definitions*****************
+		**********************************************************************/
 
         Quaternion()
             : w(0.0f)
@@ -41,8 +38,8 @@ namespace Math {
         }
 
         /**********************************************************************
-			****************Quaternion inline function definitions*****************
-			**********************************************************************/
+		****************Quaternion inline function definitions*****************
+		**********************************************************************/
 
         inline Quaternion& SetIdentity()
         {
@@ -111,6 +108,20 @@ namespace Math {
         }
 
         // Can be further optimized
+        inline Quaternion Normalize() const
+        {
+            T magnitude = Magnitude();
+
+            if (magnitude > 0.0f) {
+                T inverseMag = 1.0f / Magnitude();
+                return Quaternion(this * inverseMag);
+            } else {
+                assert(false);
+                SetIdentity();
+            }
+        }
+
+        // Can be further optimized
         inline Quaternion Inverse() const
         {
             Quaternion conjugate(w, Vector3D<T>(-(v.x), -(v.y), -(v.z)));
@@ -128,37 +139,128 @@ namespace Math {
             return *this;
         }
 
-        /*inline Mat3x3<T> ToRotationMatrix() const
+        inline T DotProduct(const Quaternion& q1, const Quaternion& q2) const
         {
-            Mat3x3<T> rotMatrix;
+            return q1.w * q2.w + q1.v.x * q2.v.x + q1.v.y * q2.v.y + q1.v.z * q2.v.z;
+        }
 
-            rotMatrix.m[0][0] = 1.0f - 2.0f * v.y * v.y - 2 * v.z * v.z;
-            rotMatrix.m[0][1] = 2.0f * v.x * v.y + 2.0f * w * v.z;
-            rotMatrix.m[0][2] = 2.0f * v.x * v.z - 2.0f * v.w * v.y;
-
-            rotMatrix.m[1][0] = 2 * v.x * v.y - 2.0f * w * v.z;
-            rotMatrix.m[1][1] = 1.0f - 2 * v.x * v.x - 2.0f * v.z * v.z;
-            rotMatrix.m[1][2] = 2.0f * v.y * v.z + 2.0f * w * v.x;
-
-            rotMatrix.m[2][0] = 2.0f * v.x * v.z + 2.0f * w * v.y;
-            rotMatrix.m[2][1] = 2.0f * v.y * v.z - 2.0f * w * v.x;
-            rotMatrix.m[2][2] = 1.0f - 2 * v.x * v.x - 2.0f * v.y * v.y;
-
-            return rotMatrix;
-        }*/
-
-        /**********************************************************************
-			*********************Output quaternions on console*********************
-			**********************************************************************/
-        inline std::ostream& operator<<(std::ostream& out)
+        inline Quaternion& Exp(const float scalar) const
         {
-            out << "Quat[" << w << ", " << v << "]";
-            return out;
+            if (fabs(w) < .9999f) {
+                float alpha = ACos(w);
+                float newAlpha = scalar * alpha;
+                float mult = Sin(newAlpha) / Sin(alpha);
+
+                Quaternion result;
+
+                result.w = Cos(newAlpha);
+                result.v.x = v.x * mult;
+                result.v.y = v.y * mult;
+                result.v.z = v.z * mult;
+
+                return result;
+            }
+
+            return *this;
+        }
+
+        inline Quaternion& Slerp(const Quaternion& q1, float t) const
+        {
+            // If interpolation parameter is out of bounds, return edge points.
+            if (t <= 0.0f)
+                return *this;
+            if (t >= 1.0f)
+                return q1;
+
+            float cosAngle = DotProduct(*this, q1);
+
+            if (cosAngle < 0.0f) {
+                q1.w = -q1.w;
+                q1.v.x = -q1.v.x;
+                q1.v.y = -q1.v.y;
+                q1.v.z = -q1.v.z;
+                cosAngle = -cosAngle;
+            }
+
+            float k0, k1 = 0.0f;
+            if (cosAngle > 0.9999f) {
+                k0 = 1.0f - t;
+                k1 = t;
+            } else {
+                float sinAngle = sqrt(1.0f - cosAngle * cosAngle);
+                float angle = atan2(sinAngle, cosAngle);
+                float invSinAngle = 1.0f / sinAngle;
+
+                k0 = Sin((1.0f - t) * angle) * invSinAngle;
+                k1 = Sin(t * angle) * invSinAngle;
+            }
+
+            // Interpolate
+            Quaternion result;
+            result.w = w * k0 + q1.w * k1;
+            result.v.x = v.x * k0 + q1.v.x * k1;
+            result.v.y = v.y * k0 + q1.v.y * k1;
+            result.v.z = v.z * k0 + q1.v.z * k1;
+
+            return result;
+        }
+
+        inline Quaternion FromMatToQuat(const Mat4x4<T>& m)
+        {
+            T wAbsVal = m[0][0] + m[1][1] + m[2][2];
+            T xAbsVal = m[0][0] - m[1][1] - m[2][2];
+            T yAbsVal = -m[0][0] + m[1][1] - m[2][2];
+            T zAbsVal = -m[0][0] - m[1][1] + m[2][2];
+
+            int biggestComp = 0;
+            T biggestAbsVal = wAbsVal;
+            if (xAbsVal > biggestAbsVal) {
+                biggestAbsVal = xAbsVal;
+                biggestComp = 1;
+            }
+            if (yAbsVal > biggestAbsVal) {
+                biggestAbsVal = yAbsVal;
+                biggestComp = 2;
+            }
+            if (zAbsVal > biggestAbsVal) {
+                biggestAbsVal = zAbsVal;
+                biggestComp = 3;
+            }
+
+            T biggestVal = sqrt(biggestAbsVal + 1.0f) * 0.5f;
+            T multComp = 0.25f / biggestVal;
+
+            Quaternion result;
+
+            switch (biggestComp) {
+            case 0:
+                result.w = biggestVal;
+                result.v.x = m[1][2] - m[2][1] * multComp;
+                result.v.y = m[2][0] - m[0][2] * multComp;
+                result.v.z = m[0][1] - m[1][0] * multComp;
+                break;
+            case 1:
+                result.v.x = biggestVal;
+                result.w = m[1][2] - m[2][1] * multComp;
+                result.v.y = m[0][1] + m[1][0] * multComp;
+                result.v.z = m[2][0] + m[0][2] * multComp;
+                break;
+            case 2:
+                result.v.y = biggestVal;
+                result.w = m[2][0] - m[0][2] * multComp;
+                result.v.x = m[0][1] + m[1][0] * multComp;
+                result.v.z = m[1][2] + m[2][1] * multComp;
+                break;
+            case 3:
+                result.v.z = biggestVal;
+                result.w = m[0][1] - m[1][0] * multComp;
+                result.v.x = m[2][0] + m[0][2] * multComp;
+                result.v.y = m[1][2] + m[2][1] * multComp;
+                break;
+            }
+
+            return result;
         }
     };
-
-    typedef Quaternion<float> Quatf;
-    typedef Quaternion<double> Quatd;
-
 } // end namespace Math
 } // end namespace Oblivion

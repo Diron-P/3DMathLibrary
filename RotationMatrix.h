@@ -1,26 +1,20 @@
 #pragma once
 
-#include "Vector3D.h"
+#include "Quaternion.h"
+#include "Mat3x3.h"
 
-class RotationMatrix
-{
-public:
-	RotationMatrix();
-	~RotationMatrix();
+namespace Oblivion {
+namespace Math {
+    template <typename T>
+    class RotationMatrix {
+    public:
+		RotationMatrix()
+        {
+            memset(m, 0, sizeof(m[0][0]) * 3 * 3);
+            m[0][0] = m[1][1] = m[2][2] = 1.0f;
+        }
 
-	float m[3][3];
-
-};
-
-
-
-RotationMatrix::RotationMatrix()
-{
-	memset(m, 0, sizeof(m[0][0]) * 3 * 3);
-	m[0][0] = m[1][1] = m[2][2] = 1.0f;
-}
-
-
-RotationMatrix::~RotationMatrix()
-{
-}
+        
+    };
+} // end namespace Math
+} // enad namespace Oblivion
