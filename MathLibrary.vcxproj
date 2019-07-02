@@ -162,15 +162,17 @@
     <ClInclude Include="Mappings.h" />
     <ClInclude Include="Mat2x2.h" />
     <ClInclude Include="Mat3x3.h" />
-    <ClInclude Include="Mat4x4.h" />
     <ClInclude Include="MathCommon.h" />
     <ClInclude Include="MathFunctions.h" />
+    <ClInclude Include="MathUtils.h" />
+    <ClInclude Include="Matrix44.h" />
+    <ClInclude Include="MatrixClipSpace.h" />
     <ClInclude Include="MatrixTransform.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="RotationMatrix.h" />
     <ClInclude Include="Vector2D.h" />
-    <ClInclude Include="Vector3D.h" />
-    <ClInclude Include="Vector4D.h" />
+    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Vector4.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

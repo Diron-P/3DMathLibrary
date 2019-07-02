@@ -32,9 +32,6 @@
     <ClInclude Include="Mat3x3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mat4x4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MathCommon.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -50,12 +47,6 @@
     <ClInclude Include="RotationMatrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vector3D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector4D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vector2D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -66,6 +57,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mappings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix44.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MathUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MatrixClipSpace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

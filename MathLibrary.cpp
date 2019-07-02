@@ -2,10 +2,23 @@
 //
 
 #include <iostream>
+#include "IO.h"
+
+using namespace Oblivion::Math;
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
+    Vector3 v1(1.0f, 2.0f, 3.0f);
+    Vector3 v2(1.0f, 2.0f, 2.0f);
+    //v1 *= v2;
+
+    std::cout << "v1 + v2 = " << v1 + v2  << std::endl;
+    std::cout << "v1 - v2 = " << v1 - v2 << std::endl;
+    std::cout << "v1 * v2 = " << v1 * v2 << std::endl;
+    std::cout << "v1 * s = " << v1 * 2 << std::endl;
+    std::cout << "v1 == v2 = " << (v1 != v2) << std::endl;
+
+	system("PAUSE");
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
