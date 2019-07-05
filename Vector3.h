@@ -28,6 +28,8 @@ namespace Math {
 		float Magnitude();
     };
 
+	class Vector4;
+
     Vector3::Vector3()
         : x(0.0f)
         , y(0.0f)

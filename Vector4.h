@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vector3.h"
+
 namespace Oblivion {
 namespace Math {
     class Vector4 {

@@ -1,198 +1,192 @@
 #pragma once
 
+#include <assert.h>
+
 #include "MathFunctions.h"
-#include "Math/Mappings.h"
+#include "MatrixClipSpace.h"
 
-namespace Oblivion
-{
-	namespace Math
-	{
-		// Scale along cardinal axes
-		template <typename T>
-		inline Mat4x4<T> Scale(const Mat4x4<T>& m, const Vector3D<T>& v)
-		{
-			Mat4x4<T> result;
+namespace Oblivion {
+namespace Math {
+    // Scale along cardinal axes
+    inline Matrix44 Scale(const Matrix44& m, const Vector3& v)
+    {
+        Matrix44 scale(1.0f);
 
-			result[0][0] = v.x;
-			result[1][1] = v.y;
-			result[2][2] = v.z;
+        scale[0][0] = v.x;
+        scale[1][1] = v.y;
+        scale[2][2] = v.z;
 
-			return result * m;
-		}
+        Matrix44 result = scale * m;
 
-		// Scale in an arbitrary direction
-		template <typename T>
-		inline Mat4x4<T> Scale(const Mat4x4<T>& m, Vector3D<T>& v, T s)
-		{
-			v.Normalize();
+        result.SetTranslation(m.GetTranslation());
+        return result;
+    }
 
-			float temp = s - 1.0f;
+    // Scale in an arbitrary direction
+    inline Matrix44 Scale(const Matrix44& m, Vector3& v, float& s)
+    {
+        Normalize(v);
 
-			float axisX = temp * v.x;
-			float axisY = temp * v.y;
-			float axisZ = temp * v.z;
+        s -= 1.0f;
 
-			Mat4x4<T> scale;
+        float axisX = s * v.x;
+        float axisY = s * v.y;
+        float axisZ = s * v.z;
 
-			scale[0][0] = 1.0f + axisX * v.x;
-			scale[0][1] = axisX * v.y;
-			scale[0][2] = axisX * v.z;
+        Matrix44 scale(1.0f);
 
-			scale[1][0] = axisX * v.y;
-			scale[1][1] = 1.0f + axisY * v.y;
-			scale[1][2] = axisY * v.z;
+        scale[0][0] = 1.0f + axisX * v.x;
+        scale[0][1] = axisX * v.y;
+        scale[0][2] = axisX * v.z;
 
-			scale[2][0] = axisX * v.z;
-			scale[2][1] = axisY * v.z;
-			scale[2][2] = 1.0f + axisZ * v.z;
+        scale[1][0] = axisX * v.y;
+        scale[1][1] = 1.0f + axisY * v.y;
+        scale[1][2] = axisY * v.z;
 
-			return scale * m;
-		}
+        scale[2][0] = axisX * v.z;
+        scale[2][1] = axisY * v.z;
+        scale[2][2] = 1.0f + axisZ * v.z;
 
-		//template <typename T>
-		inline Mat4x4<float> Rotate(const Mat4x4<float>& m, float angle, Vector3D<float>& v)
-		{
-			v.Normalize();
+        Matrix44 result = scale * m;
 
-			float sin = Sin(angle);
-			float cos = Cos(angle);
-			float temp = 1.0f - cos;
+        result.SetTranslation(m.GetTranslation());
+        return result;
+    }
 
-			float axisX = v.x * temp;
-			float axisY = v.y * temp;
-			float axisZ = v.z * temp;
+    // template <typename T>
+    inline Matrix44 Rotate(const Matrix44& m, const float& angle, Vector3& v)
+    {
+        Normalize(v);
 
-			Mat4x4<float> rotate;
+        float sin = Sin(angle);
+        float cos = Cos(angle);
+        float tmp = 1.0f - cos;
 
-			rotate[0][0] = v.x * axisX + cos;
-			rotate[0][1] = v.x * axisY + v.z * sin;
-			rotate[0][2] = v.x * axisZ - v.y * sin;
+        float axisX = v.x * tmp;
+        float axisY = v.y * tmp;
+        float axisZ = v.z * tmp;
 
-			rotate[1][0] = v.x * axisY - v.z * sin;
-			rotate[1][1] = v.y * axisY + cos;
-			rotate[1][2] = v.y * axisZ + v.x * sin;
+        Matrix44 rotate(1.0f);
 
-			rotate[2][0] = v.x * axisZ + v.y * sin;
-			rotate[2][1] = v.y * axisZ - v.x * sin;
-			rotate[2][2] = v.z * axisZ + cos;
+        rotate[0][0] = v.x * axisX + cos;
+        rotate[0][1] = v.x * axisY + v.z * sin;
+        rotate[0][2] = v.x * axisZ - v.y * sin;
 
-			Mat4x4<float> result;
+        rotate[1][0] = v.x * axisY - v.z * sin;
+        rotate[1][1] = v.y * axisY + cos;
+        rotate[1][2] = v.y * axisZ + v.x * sin;
 
-			result[0][0] = m[0][0] * rotate[0][0] + m[0][1] * rotate[1][0] + m[0][2] * rotate[2][0];
-			result[0][1] = m[0][0] * rotate[0][1] + m[0][1] * rotate[1][1] + m[0][2] * rotate[2][1];
-			result[0][2] = m[0][0] * rotate[0][2] + m[0][1] * rotate[1][2] + m[0][2] * rotate[2][2];
+        rotate[2][0] = v.x * axisZ + v.y * sin;
+        rotate[2][1] = v.y * axisZ - v.x * sin;
+        rotate[2][2] = v.z * axisZ + cos;
 
-			result[1][0] = m[1][0] * rotate[0][0] + m[1][1] * rotate[1][0] + m[1][2] * rotate[2][0];
-			result[1][1] = m[1][0] * rotate[0][1] + m[1][1] * rotate[1][1] + m[1][2] * rotate[2][1];
-			result[1][2] = m[1][0] * rotate[0][2] + m[1][1] * rotate[1][2] + m[1][2] * rotate[2][2];
+        Matrix44 result = rotate * m;
+        result.SetTranslation(m.GetTranslation());
+        return result;
+    }
 
-			result[2][0] = m[2][0] * rotate[0][0] + m[2][1] * rotate[1][0] + m[2][2] * rotate[2][0];
-			result[2][1] = m[2][0] * rotate[0][1] + m[2][1] * rotate[1][1] + m[2][2] * rotate[2][1];
-			result[2][2] = m[2][0] * rotate[0][2] + m[2][1] * rotate[1][2] + m[2][2] * rotate[2][2];
+    inline Matrix44 Rotate(const Matrix44& m, const float& angle, const int& axis)
+    {
+        float cos = Cos(angle);
+        float sin = Sin(angle);
 
-			result[3][0] = m[3][0];
-			result[3][1] = m[3][1];
-			result[3][2] = m[3][2];
+        Matrix44 rotate(1.0f);
 
-			return result;
-		}
+        switch (axis) {
+            // Rotation about x axis
+        case 1:
+            rotate[1][1] = cos;
+            rotate[1][2] = sin;
+            rotate[2][1] = -sin;
+            rotate[2][2] = cos;
+            break;
 
-		template <typename T>
-		inline Mat4x4<T> Rotate(const Mat4x4<T>& m, float angle, int axis)
-		{
-			float cos = Cos(angle);
-			float sin = Sin(angle);
+            // Rotation about y axis
+        case 2:
+            rotate[0][0] = cos;
+            rotate[0][2] = -sin;
+            rotate[2][0] = sin;
+            rotate[2][2] = cos;
+            break;
 
-			Mat4x4<T> rotate;
+            // Rotation about z axis
+        case 3:
+            rotate[0][0] = cos;
+            rotate[0][1] = sin;
+            rotate[1][0] = -sin;
+            rotate[1][1] = cos;
+            break;
 
-			switch (axis)
-			{
-				// Rotation about x axis
-			case 1:
-				rotate[1][1] = cos;
-				rotate[1][2] = sin;
-				rotate[2][1] = -sin;
-				rotate[2][2] = cos;
-				break;
+        default:
+            assert("Invalid input");
+        }
 
-				// Rotation about y axis
-			case 2:
-				rotate[0][0] = cos;
-				rotate[0][2] = -sin;
-				rotate[2][0] = sin;
-				rotate[2][2] = cos;
-				break;
+        Matrix44 result = rotate * m;
+        result.SetTranslation(m.GetTranslation());
+        return result;
+    }
 
-				// Rotation about z axis
-			case 3:
-				rotate[0][0] = cos;
-				rotate[0][1] = sin;
-				rotate[1][0] = -sin;
-				rotate[1][1] = cos;
-				break;
+    inline Matrix44 Translate(const Matrix44& m, const Vector3& v)
+    {
+        Matrix44 result(m);
 
-			default:
-				assert("Invalid input");
-			}
+        result[3][0] = v.x + m[3][0] * v.x;
+        result[3][1] = v.y + m[3][1] * v.y;
+        result[3][2] = v.z + m[3][2] * v.z;
 
-			Mat4x4<T> result;
+        return result;
+    }
 
-			result[0][0] = m[0][0] * rotate[0][0] + m[0][1] * rotate[1][0] + m[0][2] * rotate[2][0];
-			result[0][1] = m[0][0] * rotate[0][1] + m[0][1] * rotate[1][1] + m[0][2] * rotate[2][1];
-			result[0][2] = m[0][0] * rotate[0][2] + m[0][1] * rotate[1][2] + m[0][2] * rotate[2][2];
+    // Reflect about an arbitrary plane
+    inline Matrix44 Reflect(const Matrix44& m, Vector3& v)
+    {
+        Normalize(v);
 
-			result[1][0] = m[1][0] * rotate[0][0] + m[1][1] * rotate[1][0] + m[1][2] * rotate[2][0];
-			result[1][1] = m[1][0] * rotate[0][1] + m[1][1] * rotate[1][1] + m[1][2] * rotate[2][1];
-			result[1][2] = m[1][0] * rotate[0][2] + m[1][1] * rotate[1][2] + m[1][2] * rotate[2][2];
+        float axisX = -2.0f * v.x;
+        float axisY = -2.0f * v.y;
+        float axisZ = -2.0f * v.z;
 
-			result[2][0] = m[2][0] * rotate[0][0] + m[2][1] * rotate[1][0] + m[2][2] * rotate[2][0];
-			result[2][1] = m[2][0] * rotate[0][1] + m[2][1] * rotate[1][1] + m[2][2] * rotate[2][1];
-			result[2][2] = m[2][0] * rotate[0][2] + m[2][1] * rotate[1][2] + m[2][2] * rotate[2][2];
+        Matrix44 reflect(1.0f);
 
-			result[3][0] = m[3][0];
-			result[3][1] = m[3][1];
-			result[3][2] = m[3][2];
+        reflect[0][0] = 1.0f + axisX * v.x;
+        reflect[0][1] = axisX * v.y;
+        reflect[0][2] = axisX * v.z;
 
-			return result;
-		}
+        reflect[1][0] = axisX * v.y;
+        reflect[1][1] = 1.0f + axisY * v.y;
+        reflect[1][2] = axisY * v.z;
 
-		template <typename T>
-		inline Mat4x4<T> Translate(const Mat4x4<T>& m, const Vector3D<T>& v)
-		{
-			Mat4x4<T> result(m);
+        reflect[2][0] = axisX * v.z;
+        reflect[2][1] = axisY * v.z;
+        reflect[2][2] = 1.0f + axisZ * v.z;
 
-			result[3][0] = v.x + m[3][0] * v.x;
-			result[3][1] = v.y + m[3][1] * v.y;
-			result[3][2] = v.z + m[3][2] * v.z;
+        return reflect * m;
+    }
 
-			return result;
-		}
+    inline Matrix44 LookAtLH(const Vector3& eye, const Vector3& target, Vector3& tmp)
+    {
+        Vector3 forward = target - eye;
+        Normalize(forward);
+        Normalize(tmp);
+        Vector3 right = CrossProduct(tmp, forward);
+        Vector3 up = CrossProduct(forward, right);
 
-		// Reflect about an arbitrary plane
-		template <typename T>
-		inline Mat4x4<T> Reflect(const Mat4x4<T>& m, const Vector3D<T>& v)
-		{
-			v.Normalize();
+        Matrix44 viewMat(1.0f);
 
-			T axisX = -2.0f * v.x;
-			T axisY = -2.0f * v.y;
-			T axisZ = -2.0f * v.z;
+        viewMat[0][0] = right.x;
+        viewMat[0][1] = right.y;
+        viewMat[0][2] = right.z;
+        viewMat[1][0] = up.x;
+        viewMat[1][1] = up.y;
+        viewMat[1][2] = up.z;
+        viewMat[2][0] = forward.x;
+        viewMat[2][1] = forward.y;
+        viewMat[2][2] = forward.z;
+        viewMat[3][0] = -DotProduct(right, eye);
+        viewMat[3][1] = -DotProduct(up, eye);
+        viewMat[3][2] = DotProduct(forward, eye);
 
-			Mat4x4<T> reflect;
-
-			reflect[0][0] = 1.0f + axisX * v.x;
-			reflect[0][1] = axisX * v.y;
-			reflect[0][2] = axisX * v.z;
-
-			reflect[1][0] = axisX * v.y;
-			reflect[1][1] = 1.0f + axisY * v.y;
-			reflect[1][2] = axisY * v.z;
-
-			reflect[2][0] = axisX * v.z;
-			reflect[2][1] = axisY * v.z;
-			reflect[2][2] = 1.0f + axisZ * v.z;
-
-			return reflect * m;
-		}
-	}
-}
+        return viewMat;
+    }
+} // namespace Math
+} // namespace Oblivion
